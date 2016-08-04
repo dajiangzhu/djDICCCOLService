@@ -1,14 +1,13 @@
 package edu.uga.DICCCOL.stat;
 
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.stat.inference.TTestImpl;
+import org.apache.commons.math3.stat.inference.TTest;
+
 
 public class SimpleTTest {
 	
-	public double tTest(double[] dataSet1, double[] dataSet2) throws IllegalArgumentException, MathException
-	{
+	public double tTest(double[] dataSet1, double[] dataSet2) throws IllegalArgumentException	{
 		double pValue=-10.0d;
-		TTestImpl ttest = new TTestImpl();
+		TTest ttest = new TTest();
 		pValue = ttest.tTest(dataSet1, dataSet2);
 		return pValue;
 	}

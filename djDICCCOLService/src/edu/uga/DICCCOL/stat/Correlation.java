@@ -1,6 +1,7 @@
 package edu.uga.DICCCOL.stat;
 
-import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+
 
 public class Correlation {
 	
