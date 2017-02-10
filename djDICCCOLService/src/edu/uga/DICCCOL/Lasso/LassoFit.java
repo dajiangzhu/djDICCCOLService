@@ -1,9 +1,11 @@
 package edu.uga.DICCCOL.Lasso;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * This class is a container for arrays and values that
- * are computed during computation of a lasso fit. It also
- * contains the final weights of features.
+ * This class is a container for arrays and values that are computed during
+ * computation of a lasso fit. It also contains the final weights of features.
  * 
  * @author Yasser Ganjisaffar (http://www.ics.uci.edu/~yganjisa/)
  */
@@ -36,11 +38,16 @@ public class LassoFit {
 	// Total number of passes over data
 	public int numberOfPasses;
 
+	// The nonZero feature ID
+	public List<Integer> selectedFeatureList;
+
 	private int numFeatures;
 
-	public LassoFit(int numberOfLambdas, int maxAllowedFeaturesAlongPath, int numFeatures) {
+	public LassoFit(int numberOfLambdas, int maxAllowedFeaturesAlongPath,
+			int numFeatures) {
 		intercepts = new double[numberOfLambdas];
-		compressedWeights = MathUtil.allocateDoubleMatrix(numberOfLambdas, maxAllowedFeaturesAlongPath);
+		compressedWeights = MathUtil.allocateDoubleMatrix(numberOfLambdas,
+				maxAllowedFeaturesAlongPath);
 		indices = new int[maxAllowedFeaturesAlongPath];
 		numberOfWeights = new int[numberOfLambdas];
 		lambdas = new double[numberOfLambdas];
@@ -62,10 +69,20 @@ public class LassoFit {
 		int numberOfSolutions = numberOfLambdas;
 		sb.append("Compression R2 values:\n");
 		for (int i = 0; i < numberOfSolutions; i++) {
-			sb.append((i + 1) + "\t" + nonZeroWeights[i] + "\t" + MathUtil.getFormattedDouble(rsquared[i], 4) + "\t"
+			sb.append((i + 1) + "\t" + nonZeroWeights[i] + "\t"
+					+ MathUtil.getFormattedDouble(rsquared[i], 4) + "\t"
 					+ MathUtil.getFormattedDouble(lambdas[i], 5) + "\n");
 		}
 		return sb.toString().trim();
+	}
+
+	public List<Integer> getSelectedFeatureList() {
+		selectedFeatureList = new ArrayList<Integer>();
+		double[] weights = this.getWeights(this.numberOfLambdas - 1);
+		for (int i = 0; i < weights.length; i++)
+			if (Math.abs(weights[i]) > 0.0)
+				selectedFeatureList.add(i);
+		return this.selectedFeatureList;
 	}
 
 }

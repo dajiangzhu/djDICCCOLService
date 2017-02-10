@@ -10,6 +10,24 @@ import java.util.List;
  *
  */
 public class MathUtil {
+	
+	public static float getMin(float[] arr)
+	{
+		float min = 1000.0f;
+		for (float item : arr)
+			if(item<min)
+				min = item;
+		return min;
+	}
+	
+	public static float getMax(float[] arr)
+	{
+		float max = -1000.0f;
+		for (float item : arr)
+			if(item>max)
+				max = item;
+		return max;
+	}
 
 	public static double getAvg(double[] arr) {
 		double sum = 0;

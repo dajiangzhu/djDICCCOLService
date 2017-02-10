@@ -35,7 +35,7 @@ public class LassoFitGenerator {
 	private static final double MAX_RSQUARED = 0.99999;
 
 	private float[] targets;
-	private float[][] observations;
+	public float[][] observations;
 	private int numFeatures;
 	private int numObservations;
 
@@ -81,7 +81,7 @@ public class LassoFitGenerator {
 		}
 	}
 
-	private LassoFit getLassoFit(int maxAllowedFeaturesPerModel) {
+	private LassoFit getLassoFit(int maxAllowedFeaturesPerModel, float[] penalityW) {
 		long startTime = System.currentTimeMillis();
 
 		if (maxAllowedFeaturesPerModel < 0) {
@@ -92,7 +92,20 @@ public class LassoFitGenerator {
 
 		// lambdaMin = flmin * lambdaMax
 		double flmin = (numObservations < numFeatures ? 5e-2 : 1e-4);
-
+		
+		
+		
+		/********************************
+		 * normalized to 0-1
+		 */
+		for (int j = 0; j < numFeatures; j++) {
+			float curMax = MathUtil.getMax(observations[j]);
+			float curMin = MathUtil.getMin(observations[j]);
+			for (int i = 0; i < numObservations; i++) {
+				observations[j][i] = (observations[j][i]-curMin)/(curMax-curMin);
+			} //for i
+		} //for j
+		
 		/********************************
 		 * Standardize features and target: Center the target and features
 		 * (mean 0) and normalize their vectors to have the same standard
@@ -119,11 +132,15 @@ public class LassoFitGenerator {
 			targets[i] = factor * (targets[i] - targetMean);
 		}
 		float targetStd = (float) Math.sqrt(MathUtil.getDotProduct(targets, targets));
-		MathUtil.divideInPlace(targets, targetStd);
-
-		//
-		//add
-		//
+		MathUtil.divideInPlace(targets, targetStd);		
+		
+		/*********************************
+		 * Consider penality vector
+		 */
+		for(int f=0;f<numFeatures;f++)
+			for(int i = 0; i < numObservations; i++)
+				observations[f][i] *= penalityW[f];
+		
 		
 		for (int j = 0; j < numFeatures; j++) {
 			feature2residualCorrelations[j] = MathUtil.getDotProduct(targets, observations[j]);
@@ -148,7 +165,7 @@ public class LassoFitGenerator {
 		double curLambda = 0;
 		double maxDelta;
 		for (int iteration = 1; iteration <= numberOfLambdas; iteration++) {
-			System.out.println("Starting iteration " + iteration + " of Compression.");
+//			System.out.println("Starting iteration " + iteration + " of Compression.");
 
 			/**********
 			 * Compute lambda for this round
@@ -326,8 +343,8 @@ public class LassoFitGenerator {
 		this.targets[idx] = (float) target;
 	}
 
-	public LassoFit fit(int maxAllowedFeaturesPerModel) {
-		LassoFit fit = getLassoFit(maxAllowedFeaturesPerModel);
+	public LassoFit fit(int maxAllowedFeaturesPerModel, float[] penalityW) {
+		LassoFit fit = getLassoFit(maxAllowedFeaturesPerModel, penalityW);
 		return fit;
 	}
 }
