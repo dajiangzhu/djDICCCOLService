@@ -30,9 +30,9 @@ public class SVM_Classifier {
 
 		SMO svmClassifier = new SMO();
 		RBFKernel rbf = new RBFKernel();
-		for (double g = GammaStart; g <= GammaEnd; g = g + 0.01) {
-			System.out.println("Try g = "+g);
-			for (double c = CStart; c < CEnd; c = c + 2) {
+		for (double g = GammaStart; g <= GammaEnd; g = g + 0.02) {
+//			System.out.println("Try g = "+g);
+			for (double c = CStart; c <= CEnd; c = c + 1) {
 //				System.out.println("Try SMO:  Gamma-" + g + " C-" + c);
 				rbf.setGamma(g);
 				svmClassifier.setKernel(rbf);
@@ -50,6 +50,7 @@ public class SVM_Classifier {
 				double tmpACC = (TP0 + TP1) / (TP0 + TP1 + FP0 + FP1);
 				double tmpSPE = TP0 / (TP0 + FP1);
 				double tmpSEN = TP1 / (TP1 + FP0);
+				System.out.println("SVMResult: ACC:"+tmpACC+" SPE:"+tmpSPE+" SEN:"+tmpSEN+" Gamma:"+g+" C:"+c);
 				if (tmpACC > bestPerformance[0]) {
 					bestPerformance[0] = tmpACC;
 					bestPerformance[1] = tmpSPE;
