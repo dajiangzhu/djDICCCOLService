@@ -41,8 +41,10 @@ public class GenerateDICCCOL {
 
 	public GenerateDICCCOL(String surfaceFile, String predictionFile, int column, String outPutVtkFile) {
 		this.surfaceData = new djVtkSurData(surfaceFile.trim());
+//		this.predictionData = DicccolUtilIO.loadFileAsStringArray(predictionFile.trim(), CONSTANTS.DICCCOL_I_Num,
+//				CONSTANTS.PREDICTIONRESULT_COLUMN_NUM);
 		this.predictionData = DicccolUtilIO.loadFileAsStringArray(predictionFile.trim(), CONSTANTS.DICCCOL_I_Num,
-				CONSTANTS.PREDICTIONRESULT_COLUMN_NUM);
+				11);
 //		System.out.println("column="+column+" out="+outPutVtkFile.trim());
 		this.columnIndex = column;
 		this.outVtkFileName = outPutVtkFile.trim();
@@ -135,11 +137,16 @@ public class GenerateDICCCOL {
 
 			fw.write("POINT_DATA " + ((roiNum - highROINum) * normalModelPtNum + (highROINum * highModelPtNum))
 					+ "\r\n");
-			fw.write("SCALARS TheColor float 1 \r\n");
-			fw.write("LOOKUP_TABLE default \r\n");
+			fw.write("COLOR_SCALARS theColor 3 \r\n");
 			for (int roiIndex = 0; roiIndex < roiNum; roiIndex++)
-				for (int modelPtIndex = 0; modelPtIndex < normalModelPtNum; modelPtIndex++)
-					fw.write(attriList.get(roiIndex) + " \r\n");
+			for (int modelPtIndex = 0; modelPtIndex < normalModelPtNum; modelPtIndex++)
+				fw.write(attriList.get(roiIndex) + " \r\n");
+			//*************ori
+//			fw.write("SCALARS TheColor float 1 \r\n");
+//			fw.write("LOOKUP_TABLE default \r\n");
+//			for (int roiIndex = 0; roiIndex < roiNum; roiIndex++)
+//				for (int modelPtIndex = 0; modelPtIndex < normalModelPtNum; modelPtIndex++)
+//					fw.write(attriList.get(roiIndex) + " \r\n");
 
 		} catch (IOException ex) {
 			Logger.getLogger(djVtkData.class.getName()).log(Level.SEVERE, null, ex);

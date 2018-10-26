@@ -58,6 +58,7 @@ public class DicccolConnectivityService {
 	public double[][] getStructuralConnectivityMatrix() {
 		double[][] connectivityMatrix = new double[358][358];
 		List<List<Integer>> rawConnectivityInfo = new ArrayList<List<Integer>>();
+		Set<Integer> allFiberIndex = new HashSet<Integer>();
 
 		djVtkHybridData hybridData = new djVtkHybridData(this.surData, this.fiberData);
 		hybridData.mapSurfaceToBox();
@@ -69,6 +70,7 @@ public class DicccolConnectivityService {
 			for(int j=0;j<tmpCellList.size();j++)
 				newFiberIDList.add(tmpCellList.get(j).cellId);
 			rawConnectivityInfo.add(newFiberIDList);
+			allFiberIndex.addAll(newFiberIDList);
 		}
 		
 		for(int i=0;i<rawConnectivityInfo.size()-1;i++)
@@ -81,7 +83,7 @@ public class DicccolConnectivityService {
 					if(rawConnectivityInfo.get(j).contains(currentCellID))
 						count++;
 				} //for m
-				connectivityMatrix[i][j] = connectivityMatrix[j][i]=count;
+				connectivityMatrix[i][j] = connectivityMatrix[j][i]=(double)count/(double)allFiberIndex.size();
 			} //for j
 		return connectivityMatrix;
 	}
