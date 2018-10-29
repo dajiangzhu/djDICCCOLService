@@ -10,6 +10,7 @@ import edu.uga.liulab.djVtkBase.djNiftiData;
 import edu.uga.liulab.djVtkBase.djVtkCell;
 import edu.uga.liulab.djVtkBase.djVtkFiberData;
 import edu.uga.liulab.djVtkBase.djVtkHybridData;
+import edu.uga.liulab.djVtkBase.djVtkPoint;
 import edu.uga.liulab.djVtkBase.djVtkSurData;
 
 public class DicccolConnectivityService {
@@ -53,6 +54,14 @@ public class DicccolConnectivityService {
 		for (int i = 0; i < 358; i++)
 			this.predictedDicccol.add((int) allContent[i][columnIndex]);
 		allContent = null;
+	}
+	
+	public List<djVtkPoint> getDicccolPts ()
+	{
+		List<djVtkPoint> dicccolPts = new ArrayList<djVtkPoint>();
+		for (int i = 0; i < this.predictedDicccol.size(); i++)
+			dicccolPts.add(this.surData.getPoint(this.predictedDicccol.get(i)));
+		return dicccolPts;
 	}
 
 	public double[][] getStructuralConnectivityMatrix() {
