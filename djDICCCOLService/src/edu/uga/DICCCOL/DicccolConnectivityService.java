@@ -63,6 +63,18 @@ public class DicccolConnectivityService {
 			dicccolPts.add(this.surData.getPoint(this.predictedDicccol.get(i)));
 		return dicccolPts;
 	}
+	
+	public double[][] getFunctionalconnectivityMatrix()
+	{
+		double[][] connectivityMatrix = new double[358][358];
+		
+		for (int i = 0; i < this.predictedDicccol.size(); i++)
+		{
+			
+		}
+		
+		return connectivityMatrix;
+	}
 
 	public double[][] getStructuralConnectivityMatrix() {
 		double[][] connectivityMatrix = new double[358][358];
