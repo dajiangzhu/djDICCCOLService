@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import edu.uga.DICCCOL.stat.Correlation;
 import edu.uga.liulab.djVtkBase.djNiftiData;
 import edu.uga.liulab.djVtkBase.djVtkCell;
 import edu.uga.liulab.djVtkBase.djVtkFiberData;
@@ -66,14 +67,23 @@ public class DicccolConnectivityService {
 	
 	public double[][] getFunctionalconnectivityMatrix()
 	{
-		double[][] connectivityMatrix = new double[358][358];
+		double[][] functionalConnectivityMatrix = new double[358][358];
+		double[][] AllSig = new double[358][this.fmriData.tSize];
 		
 		for (int i = 0; i < this.predictedDicccol.size(); i++)
 		{
-			
+			djVtkPoint currentDicccolPt = this.surData.getPoint(this.predictedDicccol.get(i));
+			AllSig[i] = this.fmriData.getSigBasedOnPhysicalCoordinateRange(currentDicccolPt.x, currentDicccolPt.y, currentDicccolPt.z);
 		}
 		
-		return connectivityMatrix;
+		// calculating the connectivity
+		Correlation correlationHandler = new Correlation();
+		for (int i = 0; i < 357; i++)
+			for (int j = i + 1; j < 358; j++)
+				functionalConnectivityMatrix[i][j] = functionalConnectivityMatrix[j][i] = correlationHandler.Correlation_Pearsons(AllSig[i], AllSig[j]);
+		for (int i = 0; i < 358; i++)
+			functionalConnectivityMatrix[i][i] = 1.0;
+		return functionalConnectivityMatrix;
 	}
 
 	public double[][] getStructuralConnectivityMatrix() {
