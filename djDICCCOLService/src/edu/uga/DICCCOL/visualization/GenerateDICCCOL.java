@@ -160,6 +160,117 @@ public class GenerateDICCCOL {
 		System.out.println("Write file:" + fileName + ".vtk done!");
 		
 	}
+	
+	public void GenerateDICCCOLBallWithColor_ChangeSize(djVtkSurData vtkPoints, djVtkSurData vtkBallTemplate, List<String> attriList, float size, String outFileName)
+	{
+		djVtkSurData inputData = vtkPoints;
+		djVtkSurData normalModelData = vtkBallTemplate; //new djVtkSurData("../sphere_radius2.vtk");
+		djVtkSurData highlightModeData = vtkBallTemplate;
+
+		String fileName = outFileName;
+		System.out.println("Begin to write file:" + fileName + "...");
+		Map<Integer, String> highLightROI = new HashMap<Integer, String>();
+		FileWriter fw = null;
+
+		try {
+			// fw = new FileWriter(roiGroupInfo + ".vtk");
+			fw = new FileWriter(fileName);
+			fw.write("# vtk DataFile Version 3.0\r\n");
+			fw.write("vtk output\r\n");
+			fw.write("ASCII\r\n");
+			fw.write("DATASET POLYDATA\r\n");
+
+			int roiNum = inputData.nPointNum;
+			int highROINum = highLightROI.size();
+			int normalModelPtNum = normalModelData.nPointNum;
+			int highModelPtNum = highlightModeData.nPointNum;
+			int normalModelCellNum = normalModelData.nCellNum;
+			int highModelCellNum = highlightModeData.nCellNum;
+
+			System.out.println("the number of points in the input vtk is : " + roiNum);
+			System.out.println("the number of points need to be highlighted is : " + highROINum);
+			System.out.println("the number of points in the normalModel vtk is : " + normalModelPtNum);
+			System.out.println("the number of points in the highModel vtk is : " + highModelPtNum);
+			// print points info
+			List<Integer> offsetList = new ArrayList<Integer>();
+			fw.write("POINTS " + ((roiNum - highROINum) * normalModelPtNum + (highROINum * highModelPtNum))
+					+ " float\r\n");
+			for (int roiIndex = 0; roiIndex < roiNum; roiIndex++) {
+				int countNormal = 0;
+				int countHigh = 0;
+				djVtkPoint currentROIPt = inputData.getPoint(roiIndex);
+				if (highLightROI.containsKey(roiIndex)) {
+					for (int modelPtIndex = 0; modelPtIndex < highModelPtNum; modelPtIndex++) {
+						float x = highlightModeData.getPoint(modelPtIndex).x + currentROIPt.x;
+						float y = highlightModeData.getPoint(modelPtIndex).y + currentROIPt.y;
+						float z = highlightModeData.getPoint(modelPtIndex).z + currentROIPt.z;
+						fw.write(x + " " + y + " " + z + "\r\n");
+						offsetList.add(highModelPtNum);
+						countHigh++;
+					}
+				} else {
+					for (int modelPtIndex = 0; modelPtIndex < normalModelPtNum; modelPtIndex++) {
+						float x = normalModelData.getPoint(modelPtIndex).x*size + currentROIPt.x;
+						float y = normalModelData.getPoint(modelPtIndex).y*size + currentROIPt.y;
+						float z = normalModelData.getPoint(modelPtIndex).z*size + currentROIPt.z;
+						fw.write(x + " " + y + " " + z + "\r\n");
+						offsetList.add(normalModelPtNum);
+						countNormal++;
+					} // for all points in the model vtk file
+				}
+
+			} // for all points in the input vtk file
+
+			// print cells info
+			int totalCellNum = (roiNum - highROINum) * normalModelCellNum + (highROINum * highModelCellNum);
+			fw.write("POLYGONS " + totalCellNum + " " + (totalCellNum * 4) + " \r\n");
+			int offset = 0;
+			for (int roiIndex = 0; roiIndex < roiNum; roiIndex++) {
+				if (highLightROI.containsKey(roiIndex)) {
+					for (int modelCellIndex = 0; modelCellIndex < highModelCellNum; modelCellIndex++) {
+						int ptId1 = highlightModeData.getcell(modelCellIndex).pointsList.get(0).pointId + offset;
+						int ptId2 = highlightModeData.getcell(modelCellIndex).pointsList.get(1).pointId + offset;
+						int ptId3 = highlightModeData.getcell(modelCellIndex).pointsList.get(2).pointId + offset;
+						fw.write("3 " + ptId1 + " " + ptId2 + " " + ptId3 + " \r\n");
+					} // for all cells in the model vtk file
+					offset = offset + highModelPtNum;
+				} else {
+					for (int modelCellIndex = 0; modelCellIndex < normalModelCellNum; modelCellIndex++) {
+						int ptId1 = normalModelData.getcell(modelCellIndex).pointsList.get(0).pointId + offset;
+						int ptId2 = normalModelData.getcell(modelCellIndex).pointsList.get(1).pointId + offset;
+						int ptId3 = normalModelData.getcell(modelCellIndex).pointsList.get(2).pointId + offset;
+						fw.write("3 " + ptId1 + " " + ptId2 + " " + ptId3 + " \r\n");
+					} // for all cells in the model vtk file
+					offset = offset + normalModelPtNum;
+				}
+
+			} // for all points in the input vtk file
+
+			fw.write("POINT_DATA " + ((roiNum - highROINum) * normalModelPtNum + (highROINum * highModelPtNum))
+					+ "\r\n");
+			fw.write("COLOR_SCALARS theColor 3 \r\n");
+			for (int roiIndex = 0; roiIndex < roiNum; roiIndex++)
+			for (int modelPtIndex = 0; modelPtIndex < normalModelPtNum; modelPtIndex++)
+				fw.write(attriList.get(roiIndex) + " \r\n");
+			//*************ori
+//			fw.write("SCALARS TheColor float 1 \r\n");
+//			fw.write("LOOKUP_TABLE default \r\n");
+//			for (int roiIndex = 0; roiIndex < roiNum; roiIndex++)
+//				for (int modelPtIndex = 0; modelPtIndex < normalModelPtNum; modelPtIndex++)
+//					fw.write(attriList.get(roiIndex) + " \r\n");
+
+		} catch (IOException ex) {
+			Logger.getLogger(djVtkData.class.getName()).log(Level.SEVERE, null, ex);
+		} finally {
+			try {
+				fw.close();
+			} catch (IOException ex) {
+				Logger.getLogger(djVtkData.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		System.out.println("Write file:" + fileName + ".vtk done!");
+		
+	}
 
 	public List<String> getDicccolIDList() {
 		return dicccolIDList;
